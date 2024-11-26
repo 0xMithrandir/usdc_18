@@ -4,9 +4,8 @@ pragma solidity ^0.8.25;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract USDC18 is ERC20, ReentrancyGuard {
+contract USDC18 is ERC20 {
     using SafeERC20 for IERC20Metadata;
 
     IERC20Metadata public immutable USDC;
@@ -18,7 +17,7 @@ contract USDC18 is ERC20, ReentrancyGuard {
     constructor(address usdcAddress) ERC20("USDC_18", "USDC18") {
         USDC = IERC20Metadata(usdcAddress);
         uint8 usdcDecimals = USDC.decimals();
-        require(usdcDecimals <= 18, "USDC decimals must be <= 18");
+        require(usdcDecimals <= 18 && usdcDecimals > 0, "USDC decimals must be <= 18 and > 0");
         DECIMAL_CONVERTER = 10 ** (18 - usdcDecimals);
     }
 
@@ -26,7 +25,7 @@ contract USDC18 is ERC20, ReentrancyGuard {
      * @dev Deposits USDC and mints USDC18 tokens
      * @param amount Amount of USDC to deposit (in USDC's decimals)
      */
-    function deposit(uint256 amount) external nonReentrant {
+    function deposit(uint256 amount) external {
         require(amount > 0, "Amount must be greater than 0");
 
         // Transfer USDC from user to this contract
@@ -43,7 +42,7 @@ contract USDC18 is ERC20, ReentrancyGuard {
      * @dev Withdraws USDC by burning USDC18 tokens
      * @param amount18 Amount of USDC18 to burn (in 18 decimals)
      */
-    function withdraw(uint256 amount18) external nonReentrant {
+    function withdraw(uint256 amount18) external {
         require(amount18 > 0, "Amount must be greater than 0");
         require(balanceOf(msg.sender) >= amount18, "Insufficient balance");
 
